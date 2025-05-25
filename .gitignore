@@ -1,0 +1,16 @@
+# Ignore Python cache and environments
+__pycache__/
+*.pyc
+venv/
+server/venv/
+render-backend/venv/
+
+# Ignore dotenv files with secrets
+.env
+render-backend/.env
+
+# Ignore system files
+.DS_Store
+
+# Optional: VS Code settings
+.vscode/

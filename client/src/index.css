@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Full Page Setup ===== */
+html, body, #root {
+  @apply h-full w-full m-0 p-0 overflow-hidden;
+}
+
+/* ===== Global Base Styles ===== */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  @apply font-medium text-blue-500 hover:text-blue-600 no-underline;
+}
+
+body {
+  @apply flex flex-col min-w-[320px] min-h-screen;
+}
+
+h1 {
+  @apply text-5xl leading-tight;
+}
+
+button {
+  @apply rounded-lg border border-transparent px-4 py-2 text-base font-medium bg-gray-900 cursor-pointer transition-colors hover:border-blue-500 focus:outline focus:outline-4 focus:outline-blue-300;
+}
+
+/* ===== Light Theme Adjustments ===== */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* ===== Image Slider Styles ===== */
+.slider-container {
+  @apply relative w-full h-full overflow-hidden;
+}
+
+.slide {
+  @apply flex w-full h-full transition-transform duration-1000 ease-in-out;
+}
+
+.item {
+  @apply w-full h-full bg-cover bg-center relative transition-transform duration-1000;
+}
+
+.content {
+  @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white;
+}
+
+.content .name {
+  @apply text-4xl md:text-5xl font-bold uppercase;
+}
+
+.content .description {
+  @apply text-lg md:text-xl mt-4;
+}
+
+.content button {
+  @apply mt-6 px-6 py-3 bg-black/50 text-white text-lg rounded-md hover:bg-black/70 transition;
+}
+
+.button {
+  @apply absolute inset-0 flex justify-between items-center px-6 z-10;
+}
+
+.button button {
+  @apply bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition;
+}
+
+/* ===== Animated Background and Text Animations ===== */
+
+/* Animated Moving Gradient Background */
+.animate-gradient {
+  background: linear-gradient(-45deg, #ff6b6b, #6b5b95, #88d8b0, #ffcc5c);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Text Fade In Down */
+.animate-fadeInDown {
+  animation: fadeInDown 1s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Text Fade In Up */
+.animate-fadeInUp {
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
