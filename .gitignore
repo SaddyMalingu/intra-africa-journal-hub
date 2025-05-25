@@ -8,9 +8,35 @@ render-backend/venv/
 # Ignore dotenv files with secrets
 .env
 render-backend/.env
+.env*.local
 
-# Ignore system files
+# Ignore Node.js dependencies and builds
+/node_modules
+/.pnp
+.pnp.js
+/.next/
+/out/
+/build
+
+# Ignore testing coverage
+/coverage
+
+# Ignore system and misc files
 .DS_Store
+*.pem
 
-# Optional: VS Code settings
-.vscode/
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# VS Code settings (optional)
+/.vscode/
+
+# Vercel deployment config
+.vercel
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
