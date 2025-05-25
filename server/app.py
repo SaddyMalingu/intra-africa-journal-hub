@@ -171,4 +171,6 @@ def assign_reviewer():
 
 # Main runner
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.environ.get("FLASK_ENV", "development") != "production"
+    app.run(debug=debug_mode)
+
