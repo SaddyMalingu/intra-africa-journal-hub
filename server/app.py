@@ -48,7 +48,8 @@ def upload_file_to_supabase(file_content, filename, file_type):
         print("File upload failed:", response.text)
         return None
 
-    file_path = f"{SUPABASE_BUCKET}/{filename}"
+    file_path = f"{SUPABASE_BUCKET}/{filename.lstrip('/')}"
+
     return file_path
 
 # Insert metadata helper
