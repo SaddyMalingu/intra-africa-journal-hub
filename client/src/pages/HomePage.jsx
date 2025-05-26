@@ -1,7 +1,14 @@
 // src/components/HomePage.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate("/submit");
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen font-serif">
       {/* Sidebar */}
@@ -12,12 +19,12 @@ const HomePage = () => {
         <p className="mt-6 text-lg">
           Expand your Wisdom and Understanding. Discover, Connect, and Publish Excellence.
         </p>
-        <a
-          href="/submit"
+        <button
+          onClick={handleNavigate}
           className="mt-10 inline-block bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition"
         >
           Submit your Manuscript
-        </a>
+        </button>
       </aside>
 
       {/* Content */}
