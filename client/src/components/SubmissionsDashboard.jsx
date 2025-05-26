@@ -28,32 +28,33 @@ const SubmissionsDashboard = () => {
   };
 
   const handleAssign = async (submission) => {
-    const fileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_path}`;
-    const payload = {
-      submitted_file_text: fileUrl,
-      author_name: submission.author,
-      project_title: submission.title,
-      abstract: submission.abstract
-    };
-
-    try {
-      const response = await fetch(RELEVANCE_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error("Failed to assign reviewer");
-
-      alert("Reviewer assigned and email sent successfully.");
-    } catch (error) {
-      console.error("Assignment failed:", error);
-      alert("Failed to assign reviewer. Check console for details.");
-    }
+  const publicFileUrl = submission.file_url; // Correctly extracted
+  const payload = {
+    submitted_file_text: publicFileUrl, // ✅ Use correct variable
+    author_name: submission.author,
+    project_title: submission.title,
+    abstract: submission.abstract
   };
+
+  try {
+    const response = await fetch(RELEVANCE_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error("Failed to assign reviewer");
+
+    alert("Reviewer assigned and email sent successfully.");
+  } catch (error) {
+    console.error("Assignment failed:", error);
+    alert("Failed to assign reviewer. Check console for details.");
+  }
+};
+
 
   const formatFileSize = (bytes) => {
     if (!bytes) return 'N/A';
@@ -85,7 +86,8 @@ const SubmissionsDashboard = () => {
             </thead>
             <tbody>
               {submissions.map((submission) => {
-                const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_path}`;
+                const publicFileUrl = submission.file_url;
+
                 return (
                   <tr key={submission.id} className="hover:bg-gray-50">
                     <td className="p-3 border">{submission.title}</td>
