@@ -30,7 +30,7 @@ def home():
 
 # Upload file helper
 def upload_file_to_supabase(file_content, filename, file_type):
-    upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
+    upload_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
 
     headers = {
         "apikey": SUPABASE_KEY,
