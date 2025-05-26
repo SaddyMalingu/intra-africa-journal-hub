@@ -21,7 +21,7 @@ const HomePage = () => {
         </p>
         <button
           onClick={handleNavigate}
-          className="mt-10 inline-block bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-lg"
         >
           Submit your Manuscript
         </button>

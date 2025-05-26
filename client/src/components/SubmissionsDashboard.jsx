@@ -18,7 +18,7 @@ const SubmissionsDashboard = () => {
 
   const fetchSubmissions = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/submissions');
+      const response = await axios.get('https://intra-africa-journal-hub.onrender.com/api/submissions');
       setSubmissions(response.data);
     } catch (error) {
       console.error('Error fetching submissions:', error);
