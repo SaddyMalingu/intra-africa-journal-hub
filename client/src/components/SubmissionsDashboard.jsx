@@ -27,34 +27,38 @@ const SubmissionsDashboard = () => {
     }
   };
 
-  const handleAssign = async (submission) => {
-  const publicFileUrl = submission.file_url; // Correctly extracted
-  const payload = {
-    submitted_file_text: publicFileUrl, // ✅ Use correct variable
-    author_name: submission.author,
-    project_title: submission.title,
-    abstract: submission.abstract
+  const getPublicFileUrl = (filePath) => {
+    return `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${filePath}`;
   };
 
-  try {
-    const response = await fetch(RELEVANCE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`
-      },
-      body: JSON.stringify(payload)
-    });
+  const handleAssign = async (submission) => {
+    const publicFileUrl = getPublicFileUrl(submission.file_url);
 
-    if (!response.ok) throw new Error("Failed to assign reviewer");
+    const payload = {
+      submitted_file_text: publicFileUrl,
+      author_name: submission.author,
+      project_title: submission.title,
+      abstract: submission.abstract
+    };
 
-    alert("Reviewer assigned and email sent successfully.");
-  } catch (error) {
-    console.error("Assignment failed:", error);
-    alert("Failed to assign reviewer. Check console for details.");
-  }
-};
+    try {
+      const response = await fetch(RELEVANCE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify(payload)
+      });
 
+      if (!response.ok) throw new Error("Failed to assign reviewer");
+
+      alert("Reviewer assigned and email sent successfully.");
+    } catch (error) {
+      console.error("Assignment failed:", error);
+      alert("Failed to assign reviewer. Check console for details.");
+    }
+  };
 
   const formatFileSize = (bytes) => {
     if (!bytes) return 'N/A';
@@ -86,7 +90,7 @@ const SubmissionsDashboard = () => {
             </thead>
             <tbody>
               {submissions.map((submission) => {
-                const publicFileUrl = submission.file_url;
+                const publicFileUrl = getPublicFileUrl(submission.file_url);
 
                 return (
                   <tr key={submission.id} className="hover:bg-gray-50">
@@ -98,6 +102,8 @@ const SubmissionsDashboard = () => {
                     <td className="p-3 border text-center">
                       <a
                         href={publicFileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         download
                         className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-md transition"
                       >
