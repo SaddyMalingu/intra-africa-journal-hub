@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+# ✅ Update: Restrict CORS to Vercel frontend only
+CORS(app, origins=["https://intra-africa-journal-hub.vercel.app"], supports_credentials=True)
 
 # Get environment variables
 SUPABASE_URL = os.getenv("SUPABASE_URL")
