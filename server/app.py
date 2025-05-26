@@ -52,7 +52,7 @@ def upload_file_to_supabase(file_content, filename, file_type):
     return file_path
 
 # Insert metadata helper
-def insert_submission_metadata(title, author, abstract, file_path, file_size, file_type):
+def insert_submission_metadata(title, author, abstract, file_path, file_size, file_type, file_name):
     file_url = f"https://{SUPABASE_URL.split('https://')[1]}/storage/v1/object/public/{file_path}"
 
     data = {
@@ -62,7 +62,8 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
         "file_path": file_path,
         "file_size": file_size,
         "file_type": file_type,
-        "file_url": file_url
+        "file_name": file_name,  # ✅ Include file_name for frontend use
+        "file_url": file_url     # Optional convenience field
     }
 
     response = requests.post(
@@ -109,13 +110,20 @@ def submit_journal():
 
     success = insert_submission_metadata(
         title, author, abstract,
-        file_upload_response, file_size, file_type
+        file_path=file_upload_response,
+        file_size=file_size,
+        file_type=file_type,
+        file_name=filename  # ✅ Save original filename
     )
 
     if not success:
         return jsonify({"error": "Failed to save metadata"}), 500
 
-    return jsonify({"message": "Submission received!", "file_path": file_upload_response}), 201
+    return jsonify({
+        "message": "Submission received!",
+        "file_path": file_upload_response,
+        "file_name": filename
+    }), 201
 
 # Fetch all submissions
 @app.route('/api/submissions', methods=['GET'])
@@ -174,4 +182,3 @@ def assign_reviewer():
 if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_ENV", "development") != "production"
     app.run(debug=debug_mode)
-

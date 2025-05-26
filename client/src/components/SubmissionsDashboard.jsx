@@ -27,13 +27,8 @@ const SubmissionsDashboard = () => {
     }
   };
 
-  const getPublicFileUrl = (filePath) => {
-    return `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${filePath}`;
-  };
-
   const handleAssign = async (submission) => {
-    const publicFileUrl = getPublicFileUrl(submission.file_url);
-
+    const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
     const payload = {
       submitted_file_text: publicFileUrl,
       author_name: submission.author,
@@ -90,7 +85,7 @@ const SubmissionsDashboard = () => {
             </thead>
             <tbody>
               {submissions.map((submission) => {
-                const publicFileUrl = getPublicFileUrl(submission.file_url);
+                const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
 
                 return (
                   <tr key={submission.id} className="hover:bg-gray-50">
@@ -102,8 +97,6 @@ const SubmissionsDashboard = () => {
                     <td className="p-3 border text-center">
                       <a
                         href={publicFileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         download
                         className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-md transition"
                       >
