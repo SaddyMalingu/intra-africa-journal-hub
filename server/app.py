@@ -62,8 +62,8 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
         "file_path": file_path,
         "file_size": file_size,
         "file_type": file_type,
-        "file_name": file_name,  # ✅ Include file_name for frontend use
-        "file_url": file_url     # Optional convenience field
+        "file_name": file_name,
+        "file_url": file_url
     }
 
     response = requests.post(
@@ -73,9 +73,14 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
     )
 
     if response.status_code not in (200, 201):
-        print("Metadata insert failed:", response.text)
+        print("⚠️ Supabase metadata insert error:")
+        print("Status:", response.status_code)
+        print("Response:", response.text)
+        print("Payload sent:", data)
         return False
+
     return True
+
 
 # Handle journal submission
 @app.route('/api/submission', methods=['POST'])
