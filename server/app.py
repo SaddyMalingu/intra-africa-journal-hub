@@ -72,15 +72,13 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
         json=data
     )
 
+    print("📦 Metadata payload:", data)
+    print("📥 Supabase response:", response.status_code, response.text)
+
     if response.status_code not in (200, 201):
-        print("⚠️ Supabase metadata insert error:")
-        print("Status:", response.status_code)
-        print("Response:", response.text)
-        print("Payload sent:", data)
         return False
 
     return True
-
 
 # Handle journal submission
 @app.route('/api/submission', methods=['POST'])
