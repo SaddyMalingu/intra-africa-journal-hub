@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const SUPABASE_PUBLIC_URL = "https://jyornhragxexaipvkbvl.supabase.co/storage/v1/object/public";
 const BUCKET_NAME = "submissions";
@@ -11,6 +13,9 @@ const API_KEY = "243d8bc57206-4045-ae29-16c0aef3c4f3:sk-MzAzZDg2MDEtNzk2Yi00NTc1
 const SubmissionsDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [currentSubmission, setCurrentSubmission] = useState(null);
+  const [reviewerEmail, setReviewerEmail] = useState("");
 
   useEffect(() => {
     fetchSubmissions();
@@ -27,7 +32,7 @@ const SubmissionsDashboard = () => {
     }
   };
 
-  const handleAssign = async (submission) => {
+  const handleRelevanceAssign = async (submission) => {
     const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
     const payload = {
       submitted_file_text: publicFileUrl,
@@ -46,12 +51,31 @@ const SubmissionsDashboard = () => {
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error("Failed to assign reviewer");
+      if (!response.ok) throw new Error("Failed to assign reviewer via Relevance");
 
-      alert("Reviewer assigned and email sent successfully.");
+      alert("Relevance webhook triggered and email sent successfully.");
     } catch (error) {
-      console.error("Assignment failed:", error);
-      alert("Failed to assign reviewer. Check console for details.");
+      console.error("Relevance assignment failed:", error);
+      alert("Failed to trigger Relevance webhook.");
+    }
+  };
+
+  const handleManualAssign = async () => {
+    if (!currentSubmission || !reviewerEmail) return;
+
+    try {
+      await axios.post("https://intra-africa-journal-hub.onrender.com/api/assign-reviewer", {
+        submission_id: currentSubmission.id,
+        reviewer_email: reviewerEmail
+      });
+
+      alert("Reviewer assigned and logged successfully.");
+      setShowModal(false);
+      setReviewerEmail("");
+      setCurrentSubmission(null);
+    } catch (err) {
+      console.error("Assignment error:", err);
+      alert("Failed to assign reviewer.");
     }
   };
 
@@ -67,6 +91,30 @@ const SubmissionsDashboard = () => {
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-6">Journal Submissions Dashboard</h2>
+
+      {/* Reviewer Assignment Modal */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Reviewer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Assign reviewer for: <strong>{currentSubmission?.title}</strong></p>
+            <Input
+              type="email"
+              placeholder="Reviewer email"
+              value={reviewerEmail}
+              onChange={(e) => setReviewerEmail(e.target.value)}
+              required
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button onClick={handleManualAssign}>Assign</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {submissions.length === 0 ? (
         <p>No submissions yet.</p>
       ) : (
@@ -104,13 +152,25 @@ const SubmissionsDashboard = () => {
                       </a>
                     </td>
                     <td className="p-3 border text-center">
-                      <Button
-                        onClick={() => handleAssign(submission)}
-                        variant="default"
-                        size="sm"
-                      >
-                        Assign
-                      </Button>
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          onClick={() => handleRelevanceAssign(submission)}
+                          variant="default"
+                          size="sm"
+                        >
+                          Relevance
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setCurrentSubmission(submission);
+                            setShowModal(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Manual
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );
