@@ -8,7 +8,7 @@ const SUPABASE_PUBLIC_URL = "https://jyornhragxexaipvkbvl.supabase.co/storage/v1
 const BUCKET_NAME = "submissions";
 
 const RELEVANCE_API_URL = "https://api-d7b62b.stack.tryrelevance.com/latest/studios/d7f0ca6d-60c9-42c2-a0b8-25c610f5c558/trigger_webhook?project=243d8bc57206-4045-ae29-16c0aef3c4f3";
-const API_KEY = "243d8bc57206-4045-ae29-16c0aef3c4f3:sk-MzAzZDg2MDEtNzk2Yi00NTc1LWE2MWEtYTA2NzRiZjIxYmQw";
+const API_KEY = "243d8bc57206-4045-ae29-16c0aef3c4f3:sk-NmI2ODFmZWMtYWZhNS00YmM1LWE5OWQtNTU4NzJkYzk2NGJj";
 
 const SubmissionsDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
