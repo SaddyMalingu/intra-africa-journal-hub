@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify 
 from flask_cors import CORS
 import os
 import requests
@@ -22,6 +22,10 @@ SUPABASE_HEADERS = {
     "Authorization": f"Bearer {SUPABASE_KEY}",
     "Content-Type": "application/json",
 }
+
+# Relevance AI Webhook info
+RELEVANCE_API_URL = "https://api-d7b62b.stack.tryrelevance.com/latest/studios/d7f0ca6d-60c9-42c2-a0b8-25c610f5c558/trigger_webhook?project=243d8bc57206-4045-ae29-16c0aef3c4f3"
+RELEVANCE_API_KEY = "243d8bc57206-4045-ae29-16c0aef3c4f3:sk-MzAzZDg2MDEtNzk2Yi00NTc1LWE2MWEtYTA2NzRiZjIxYmQw"
 
 # Home route
 @app.route("/")
@@ -143,7 +147,37 @@ def get_submissions():
     submissions = response.json()
     return jsonify(submissions), 200
 
-# ✅ New: Assign reviewers to a submission
+# ✅ New: Assign reviewers via Relevance AI webhook
+@app.route('/api/trigger-assign', methods=['POST'])
+def trigger_assign():
+    data = request.get_json()
+
+    # Basic input validation
+    required_fields = ['submitted_file_text', 'author_name', 'project_title', 'abstract']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing one or more required fields."}), 400
+
+    try:
+        response = requests.post(
+            RELEVANCE_API_URL,
+            headers={
+                "Authorization": f"Bearer {RELEVANCE_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=data
+        )
+
+        if response.status_code not in (200, 201):
+            print("Webhook trigger failed:", response.text)
+            return jsonify({"error": "Failed to trigger webhook"}), 500
+
+        return jsonify({"message": "Reviewer assigned and email sent successfully."}), 200
+
+    except Exception as e:
+        print("Error triggering assign:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+# ✅ Still here: Manual reviewer assignment (optional legacy path)
 @app.route('/api/assign-reviewer', methods=['POST'])
 def assign_reviewer():
     data = request.get_json()
