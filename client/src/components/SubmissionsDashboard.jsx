@@ -35,10 +35,11 @@ const SubmissionsDashboard = () => {
   const handleRelevanceAssign = async (submission) => {
     const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
     const payload = {
-      submitted_file_text: publicFileUrl,
       author_name: submission.author,
       project_title: submission.title,
-      abstract: submission.abstract
+      abstract: submission.abstract,
+      file_url: publicFileUrl,
+      file_name: submission.file_name
     };
 
     try {
