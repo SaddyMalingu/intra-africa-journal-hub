@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-# ✅ Restrict CORS to Vercel frontend only
+# ✅ Update: Restrict CORS to Vercel frontend only
 CORS(app, origins=["https://intra-africa-journal-hub.vercel.app"], supports_credentials=True)
 
 # Get environment variables
@@ -28,9 +28,9 @@ SUPABASE_HEADERS = {
 def home():
     return "Hello from Flask backend with Supabase integration!"
 
-# Upload file helper
+# Upload file helper (✅ FIXED ENDPOINT & METHOD)
 def upload_file_to_supabase(file_content, filename, file_type):
-    upload_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+    upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
 
     headers = {
         "apikey": SUPABASE_KEY,
@@ -38,7 +38,7 @@ def upload_file_to_supabase(file_content, filename, file_type):
         "Content-Type": file_type
     }
 
-    response = requests.post(upload_url, headers=headers, data=file_content)
+    response = requests.put(upload_url, headers=headers, data=file_content)
 
     if response.status_code == 409:
         print("Duplicate file upload detected:", response.text)
@@ -49,7 +49,6 @@ def upload_file_to_supabase(file_content, filename, file_type):
         return None
 
     file_path = f"{SUPABASE_BUCKET}/{filename.lstrip('/')}"
-
     return file_path
 
 # Insert metadata helper
@@ -63,8 +62,8 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
         "file_path": file_path,
         "file_size": file_size,
         "file_type": file_type,
-        "file_name": file_name,
-        "file_url": file_url
+        "file_name": file_name,  # ✅ Include file_name for frontend use
+        "file_url": file_url     # Optional convenience field
     }
 
     response = requests.post(
@@ -78,71 +77,53 @@ def insert_submission_metadata(title, author, abstract, file_path, file_size, fi
         return False
     return True
 
-# ✅ Enhanced: Handle journal submission with debugging
+# Handle journal submission
 @app.route('/api/submission', methods=['POST'])
 def submit_journal():
-    try:
-        print("🔔 Received new submission")
-        
-        if 'file' not in request.files:
-            print("⚠️ No file part in request.files")
-            return jsonify({"error": "No file provided"}), 400
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
 
-        file = request.files['file']
-        title = request.form.get('title')
-        author = request.form.get('author')
-        abstract = request.form.get('abstract')
+    file = request.files['file']
+    title = request.form.get('title')
+    author = request.form.get('author')
+    abstract = request.form.get('abstract')
 
-        if not file or not title or not author or not abstract:
-            print(f"⚠️ Missing fields - file: {file}, title: {title}, author: {author}, abstract: {abstract}")
-            return jsonify({"error": "Missing required fields"}), 400
+    if not file or not title or not author or not abstract:
+        return jsonify({"error": "Missing required fields"}), 400
 
-        filename = secure_filename(file.filename)
-        print("📄 Sanitized filename:", filename)
+    filename = secure_filename(file.filename)
+    file_content = file.read()
+    file_size = len(file_content)
+    file_type = file.content_type
 
-        file_content = file.read()
-        file_size = len(file_content)
-        file_type = file.content_type
-        print(f"📦 File type: {file_type}, size: {file_size} bytes")
+    file_upload_response = upload_file_to_supabase(
+        file_content=file_content,
+        filename=filename,
+        file_type=file_type
+    )
 
-        print("🚀 Uploading file to Supabase...")
-        file_upload_response = upload_file_to_supabase(
-            file_content=file_content,
-            filename=filename,
-            file_type=file_type
-        )
+    if file_upload_response == "duplicate":
+        return jsonify({"error": "Duplicate submission. This file already exists."}), 409
 
-        if file_upload_response == "duplicate":
-            print("❗ Duplicate file detected")
-            return jsonify({"error": "Duplicate submission. This file already exists."}), 409
+    if not file_upload_response:
+        return jsonify({"error": "Failed to upload file"}), 500
 
-        if not file_upload_response:
-            print("❌ Upload failed")
-            return jsonify({"error": "Failed to upload file"}), 500
+    success = insert_submission_metadata(
+        title, author, abstract,
+        file_path=file_upload_response,
+        file_size=file_size,
+        file_type=file_type,
+        file_name=filename  # ✅ Save original filename
+    )
 
-        print("📝 Inserting metadata into Supabase...")
-        success = insert_submission_metadata(
-            title, author, abstract,
-            file_path=file_upload_response,
-            file_size=file_size,
-            file_type=file_type,
-            file_name=filename
-        )
+    if not success:
+        return jsonify({"error": "Failed to save metadata"}), 500
 
-        if not success:
-            print("❌ Metadata insert failed")
-            return jsonify({"error": "Failed to save metadata"}), 500
-
-        print("✅ Submission completed successfully.")
-        return jsonify({
-            "message": "Submission received!",
-            "file_path": file_upload_response,
-            "file_name": filename
-        }), 201
-
-    except Exception as e:
-        print("🔥 Exception occurred during submission:", str(e))
-        return jsonify({"error": "Server error", "details": str(e)}), 500
+    return jsonify({
+        "message": "Submission received!",
+        "file_path": file_upload_response,
+        "file_name": filename
+    }), 201
 
 # Fetch all submissions
 @app.route('/api/submissions', methods=['GET'])
@@ -159,7 +140,7 @@ def get_submissions():
     submissions = response.json()
     return jsonify(submissions), 200
 
-# Assign reviewers to a submission
+# ✅ New: Assign reviewers to a submission
 @app.route('/api/assign-reviewer', methods=['POST'])
 def assign_reviewer():
     data = request.get_json()
