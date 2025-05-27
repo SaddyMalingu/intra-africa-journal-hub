@@ -33,33 +33,33 @@ const SubmissionsDashboard = () => {
   };
 
   const handleRelevanceAssign = async (submission) => {
-    const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
-    const payload = {
-      author_name: submission.author,
-      project_title: submission.title,
-      abstract: submission.abstract,
-      file_url: publicFileUrl,
-      file_name: submission.file_name
-    };
-
-    try {
-      const response = await fetch(RELEVANCE_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error("Failed to assign reviewer via Relevance");
-
-      alert("Relevance webhook triggered and email sent successfully.");
-    } catch (error) {
-      console.error("Relevance assignment failed:", error);
-      alert("Failed to trigger Relevance webhook.");
-    }
+  const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
+  const payload = {
+    author_name: submission.author,
+    project_title: submission.title,
+    abstract: submission.abstract,
+    file_url: publicFileUrl,
+    file_name: submission.file_name
   };
+
+  try {
+    const response = await fetch(RELEVANCE_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": API_KEY // NOT 'Bearer ' + API_KEY
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error("Failed to assign reviewer");
+
+    alert("Relevance webhook triggered and email sent successfully.");
+  } catch (error) {
+    console.error("Assignment failed:", error);
+    alert("Failed to trigger Relevance webhook.");
+  }
+};
 
   const handleManualAssign = async () => {
     if (!currentSubmission || !reviewerEmail) return;
