@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const SUPABASE_PUBLIC_URL = "https://jyornhragxexaipvkbvl.supabase.co/storage/v1/object/public";
 const BUCKET_NAME = "submissions";
@@ -94,12 +93,13 @@ const SubmissionsDashboard = () => {
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
             <h3 className="text-lg font-bold mb-4">Assign Reviewer</h3>
             <p className="mb-2">For: <strong>{currentSubmission?.title}</strong></p>
-            <Input
+            <input
               type="email"
               placeholder="Reviewer email"
               value={reviewerEmail}
               onChange={(e) => setReviewerEmail(e.target.value)}
               required
+              className="border rounded px-3 py-2 w-full"
             />
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
