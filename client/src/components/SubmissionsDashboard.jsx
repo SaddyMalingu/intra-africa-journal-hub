@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 const SUPABASE_PUBLIC_URL = "https://jyornhragxexaipvkbvl.supabase.co/storage/v1/object/public";
@@ -86,20 +85,15 @@ const SubmissionsDashboard = () => {
     return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
   };
 
-  if (loading) return <div>Loading submissions...</div>;
-
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-6">Journal Submissions Dashboard</h2>
 
-      {/* Reviewer Assignment Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Assign Reviewer</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>Assign reviewer for: <strong>{currentSubmission?.title}</strong></p>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Assign Reviewer</h3>
+            <p className="mb-2">For: <strong>{currentSubmission?.title}</strong></p>
             <Input
               type="email"
               placeholder="Reviewer email"
@@ -107,15 +101,17 @@ const SubmissionsDashboard = () => {
               onChange={(e) => setReviewerEmail(e.target.value)}
               required
             />
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
               <Button onClick={handleManualAssign}>Assign</Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
-      {submissions.length === 0 ? (
+      {loading ? (
+        <p>Loading submissions...</p>
+      ) : submissions.length === 0 ? (
         <p>No submissions yet.</p>
       ) : (
         <div className="overflow-x-auto">
