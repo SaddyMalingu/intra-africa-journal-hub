@@ -7,9 +7,6 @@ import { Input } from "@/components/ui/input";
 const SUPABASE_PUBLIC_URL = "https://jyornhragxexaipvkbvl.supabase.co/storage/v1/object/public";
 const BUCKET_NAME = "submissions";
 
-const RELEVANCE_API_URL = "https://api-d7b62b.stack.tryrelevance.com/latest/studios/d7f0ca6d-60c9-42c2-a0b8-25c610f5c558/trigger_webhook?project=243d8bc57206-4045-ae29-16c0aef3c4f3";
-const API_KEY = "243d8bc57206-4045-ae29-16c0aef3c4f3:sk-NmI2ODFmZWMtYWZhNS00YmM1LWE5OWQtNTU4NzJkYzk2NGJj";
-
 const SubmissionsDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,33 +30,35 @@ const SubmissionsDashboard = () => {
   };
 
   const handleRelevanceAssign = async (submission) => {
-  const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
-  const payload = {
-    author_name: submission.author,
-    project_title: submission.title,
-    abstract: submission.abstract,
-    file_url: publicFileUrl,
-    file_name: submission.file_name
+    const reviewer = prompt("Enter reviewer email:");
+    if (!reviewer) return;
+
+    const publicFileUrl = `${SUPABASE_PUBLIC_URL}/${BUCKET_NAME}/${submission.file_name}`;
+
+    const payload = {
+      reviewer_email: reviewer,
+      title: submission.title,
+      author: submission.author,
+      abstract: submission.abstract,
+      file_url: publicFileUrl
+    };
+
+    try {
+      const response = await axios.post(
+        "https://intra-africa-journal-hub.onrender.com/api/send-review-email",
+        payload
+      );
+
+      if (response.status === 200) {
+        alert("Reviewer email sent successfully.");
+      } else {
+        alert("Failed to send email.");
+      }
+    } catch (error) {
+      console.error("Email error:", error);
+      alert("Error sending reviewer email.");
+    }
   };
-
-  try {
-    const response = await fetch(RELEVANCE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": API_KEY // NOT 'Bearer ' + API_KEY
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) throw new Error("Failed to assign reviewer");
-
-    alert("Relevance webhook triggered and email sent successfully.");
-  } catch (error) {
-    console.error("Assignment failed:", error);
-    alert("Failed to trigger Relevance webhook.");
-  }
-};
 
   const handleManualAssign = async () => {
     if (!currentSubmission || !reviewerEmail) return;
@@ -159,7 +158,7 @@ const SubmissionsDashboard = () => {
                           variant="default"
                           size="sm"
                         >
-                          Relevance
+                          Email Reviewer
                         </Button>
                         <Button
                           onClick={() => {
