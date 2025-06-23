@@ -29,7 +29,7 @@ const SubmissionsDashboard = () => {
     }
   };
 
-  const handleRelevanceAssign = async (submission) => {
+  const handleEmailAssign = async (submission) => {
     const reviewer = prompt("Enter reviewer email:");
     if (!reviewer) return;
 
@@ -154,7 +154,7 @@ const SubmissionsDashboard = () => {
                     <td className="p-3 border text-center">
                       <div className="flex gap-2 justify-center">
                         <Button
-                          onClick={() => handleRelevanceAssign(submission)}
+                          onClick={() => handleEmailAssign(submission)}
                           variant="default"
                           size="sm"
                         >
