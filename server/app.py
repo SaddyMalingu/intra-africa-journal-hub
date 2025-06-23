@@ -4,11 +4,22 @@ import os
 import requests
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from flask_mail import Mail, Message  # ✅ New
+
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+# ✅ Gmail SMTP setup
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('GMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.getenv('GMAIL_PASS')
+
+mail = Mail(app)
+
 # ✅ Update: Restrict CORS to Vercel frontend only
 CORS(app, origins=["https://intra-africa-journal-hub.vercel.app"], supports_credentials=True)
 
@@ -214,6 +225,55 @@ def assign_reviewer():
         return jsonify({"error": "Failed to assign some reviewers", "details": errors}), 500
 
     return jsonify({"message": "Reviewers assigned successfully!"}), 201
+
+# ✅ New route to send reviewer email via Gmail SMTP
+@app.route("/api/send-review-email", methods=["POST"])
+def send_review_email():
+    data = request.get_json()
+    reviewer_email = data.get("reviewer_email")
+    title = data.get("title")
+    author = data.get("author")
+    abstract = data.get("abstract")
+    file_url = data.get("file_url")
+
+    if not reviewer_email or not title or not file_url:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = f"Review Request: {title}"
+        msg["From"] = os.getenv("EMAIL_FROM")
+        msg["To"] = reviewer_email
+        msg.set_content(
+            f"""
+Hello Reviewer,
+
+You have been assigned to review a new journal submission.
+
+Title: {title}
+Author: {author}
+Abstract: {abstract}
+
+You can download the submission file here:
+{file_url}
+
+Please acknowledge this assignment.
+
+Regards,
+Editorial Team
+"""
+        )
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(os.getenv("EMAIL_FROM"), os.getenv("EMAIL_APP_PASSWORD"))
+            smtp.send_message(msg)
+
+        return jsonify({"message": "Email sent successfully"}), 200
+
+    except Exception as e:
+        print("Email sending failed:", e)
+        return jsonify({"error": "Failed to send email"}), 500
+
 
 # Main runner
 if __name__ == "__main__":
